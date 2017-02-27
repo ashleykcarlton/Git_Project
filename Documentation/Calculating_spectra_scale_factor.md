@@ -1,0 +1,1 @@
+# Calculating the scale factor to apply to the Geant4 simulation of a spectra at a given energy rand and specifed Rj (and L-shell)

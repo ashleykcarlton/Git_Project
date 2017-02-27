@@ -1,0 +1,7 @@
+# .gitignore
+
+*.DS_store
+
+*.m~
+
+Data/
