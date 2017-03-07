@@ -1,9 +1,21 @@
 function combineSims(energy_MeV,num_sims)
- 
-dataDir = ['Data/Geant4_simulations/run_mono/',num2str(energy_MeV),'MeV/processed/'];
-outputfile = [dataDir,num2str(energy_MeV),'MeV_all.mat'];
 
-getFilenames = dir([dataDir,'*run*']);
+energy_str = [num2str(energy_MeV,'%02.0f'),'MeV'];
+dataDir = ['Data/Geant4_simulations/run_mono/',energy_str,'/processed/'];
+
+fid = fopen([dataDir,'/processing_summary.log'],'a+');
+if fid == -1
+    error('Author:Function:OpenFile', 'Cannot open file: %s', inputfile);
+end
+fprintf(fid,'\n===========================\n%s\n\n',datestr(now));
+fprintf(fid,'Running combineSims.m\n');
+
+getFilenames = dir([dataDir,'*_run*']);
+% if length(getFilenames)==num_sims
+%     outputfile = [dataDir,energy_str,'_all.mat'];
+% else
+    outputfile = [dataDir,energy_str,'_',num2str(num_sims),'runs.mat'];
+% end
 
 for jj=1:num_sims
    load([dataDir,getFilenames(jj).name])
@@ -14,14 +26,18 @@ for jj=1:num_sims
    E_tot(:,:,jj) = E_tot_sim;
 end
 
-simStatsCombined.total_tracks = total_tracks;
-simStatsCombined.total_nonzero_tracks = total_nonzero_tracks;
-simStatsCombined.total_unique_parentIDs = total_unique_PIDs;
+simStatsCombined.total_tracks = sum(total_tracks);
+simStatsCombined.total_nonzero_tracks = sum(total_nonzero_tracks);
+simStatsCombined.total_unique_parentIDs = sum(total_unique_PIDs);
 
 simEnergyCombined.Edep_eachSim = E_tot;
 simEnergyCombined.Edep_all = sum(E_tot,3);
-simEnergyCombined.Edep_all_aray = reshape(simEnergyCombined.Edep_all,length(simEnergyCombined.Edep_all)^2,1);
+simEnergyCombined.Edep_all_array = reshape(simEnergyCombined.Edep_all,length(simEnergyCombined.Edep_all)^2,1);
 
-save(outputfile,'simStatsCombined','simEnergyCombined','num_sims','energy_MeV','num_sims')
+fprintf(fid,'Total number of pixels with energy deposited: %d\n',...
+    nnz(simEnergyCombined.Edep_all_array));
+fclose(fid);
+
+save(outputfile,'simStatsCombined','simEnergyCombined','num_sims','energy_MeV')
 
 end
