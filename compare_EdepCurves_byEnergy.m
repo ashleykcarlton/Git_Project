@@ -47,9 +47,21 @@ for ii=1:length(energy)
     fitresults(ii).fit = fitresult(edges);
     fitresults(ii).edges = edges;
     fitresults(ii).gof = gof;
+    
+    min_edge_range(ii) = length(histresults(ii).edges);
+
+    % Normalization
+    histresults(ii).N_norm = N/max(N);
+    histresults(ii).N_norm_greater3keV = N/(max(N(aboveE/bin_width:end)));
+%     histresults(ii).edges_greater3keV = histresults(ii).edges(aboveE/bin_width:end);
+    [fitresult_3keV,gof_3keV] = createFit(histresults(ii).edges(1+aboveE/bin_width:end),...
+        histresults(ii).N_norm_greater3keV(1+aboveE/bin_width:end),energy(ii),0);
+    fitresults(ii).fitresult_3keV = fitresult_3keV;
+    fitresults(ii).gof_3keV = gof_3keV;
+    fitresults(ii).fit_3keV = fitresult_3keV(histresults(ii).edges(1+aboveE/bin_width:end));
 end
 
-% Plot fitted curves
+% Plot fitted curves -- normalized
 figure1 = figure('Color',[1 1 1]);
 axes1 = axes('Parent',figure1);
 hold(axes1,'on');
@@ -61,11 +73,11 @@ legend(axes1,'show');
 xlim(axes1,[0 400])
 xlabel(axes1,'Energy Deposited [keV]')
 ylim(axes1,[0 1])
-ylabel(axes1,'Normalized Number of Pixels')
+ylabel(axes1,'Number of Pixels')
 axes1.FontSize = 18;
 grid on; box on;
 
-% Plot fitted curves -- zoomed in (<50 keV)
+% Plot fitted curves -- normalized, zoomed in (<50 keV)
 figure1 = figure('Color',[1 1 1]);
 axes1 = axes('Parent',figure1);
 hold(axes1,'on');
@@ -77,8 +89,80 @@ legend(axes1,'show');
 xlim(axes1,[0 50])
 xlabel(axes1,'Energy Deposited [keV]')
 ylim(axes1,[0 1])
-ylabel(axes1,'Normalized Number of Pixels')
+ylabel(axes1,'Number of Pixels')
 axes1.FontSize = 18;
+grid on; box on;
+
+% Plot fitted curves -- normalized to >3 keV, zoomed in (<50 keV)
+figure1 = figure('Color',[1 1 1]);
+axes1 = axes('Parent',figure1);
+hold(axes1,'on');
+for jj=1:length(energy)
+    displayName = strcat(num2str(num_simulations(jj)),' sims of ',num2str(energy(jj)),' MeV');
+    plot(histresults(jj).edges(1+aboveE/bin_width:end),...
+        fitresults(jj).fit_3keV,'DisplayName',displayName)
+end
+legend(axes1,'show');
+xlim(axes1,[0 50])
+xlabel(axes1,'Energy Deposited [keV]')
+ylim(axes1,[0 1])
+ylabel(axes1,'Number of Pixels')
+axes1.FontSize = 18;
+grid on; box on;
+
+% Plot histograms -- not normalized
+figure('Color',[1 1 1])
+histogram(histresults(2).E_tot_array_noZeros,histresults(2).edges,'EdgeColor','none')
+hold on
+histogram(histresults(1).E_tot_array_noZeros,histresults(1).edges,'EdgeColor','none')
+xlabel('Energy Deposited [keV]')
+ylabel('Number of Pixels')
+legend('50 MeV', '10 MeV')
+title_str = sprintf('G4 simulation of Energy Deposited on Galileo SSI');
+title(title_str)
+set(gca,'FontSize',16,'FontWeight','bold')
+grid on; box on;
+xlim([0 50])
+% ylim([0 1])
+
+cmap = colormap('parula');
+cmap_inds = 1:floor(length(cmap)/length(energy)):length(cmap);
+
+figure1 = figure('Color',[1 1 1]);
+% Plot histograms -- normalized
+subplot(2,1,1)
+hold on;
+for kk = length(energy):-1:1
+    displayName = strcat(num2str(num_simulations(kk)),' sims of ',num2str(energy(kk)),' MeV');
+    bar(histresults(kk).edges(1:min(min_edge_range)),histresults(kk).N_norm(1:min(min_edge_range)),'FaceAlpha',0.75,...
+        'FaceColor',cmap(cmap_inds(kk),:),'BarWidth',1,'EdgeColor','none','DisplayName',displayName)
+end
+legend(gca,'show');
+xlim([0 50])
+xlabel('Energy Deposited [keV]')
+ylim([0 1])
+ylabel('Number of Pixels')
+title_str = sprintf('G4 simulation histograms - normalized to peak');
+title(title_str)
+set(gca,'FontSize',18,'FontWeight','bold');
+grid on; box on;
+
+% Plot histograms -- normalized to peak greater than 3 keV
+subplot(2,1,2)
+hold on;
+for kk = length(energy):-1:1
+    displayName = strcat(num2str(num_simulations(kk)),' sims of ',num2str(energy(kk)),' MeV');
+    bar(histresults(kk).edges(1:min(min_edge_range)),histresults(kk).N_norm_greater3keV(1:min(min_edge_range)),'FaceAlpha',0.75,...
+        'FaceColor',cmap(cmap_inds(kk),:),'BarWidth',1,'EdgeColor','none','DisplayName',displayName)
+end
+legend(gca,'show');
+xlim([3 50])
+xlabel('Energy Deposited [keV]')
+ylim([0 1])
+ylabel('Number of Pixels')
+title_str = sprintf('G4 simulation histograms - normalized to peak >3 keV');
+title(title_str)
+set(gca,'FontSize',18,'FontWeight','bold');
 grid on; box on;
 
 % minLen = length(fitresults(1).fit);
