@@ -5,7 +5,7 @@ setParams;
 % Import all simulation textfiles for a particular energy, save processed
 % data
 % (or skip because the .mat files that have already been made from a previous run)
-processed_files = dir([dataDir,'processed/*run*.mat']);
+processed_files = dir([dataDir,'processed/*_run*.mat']);
 if length(processed_files)>=num_simulations
     fprintf('%d processed mat files already exist for %d MeV.\nSkipping raw textfile import.\n',num_simulations,energy)
 else

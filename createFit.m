@@ -18,6 +18,7 @@ function [fitresult, gof] = createFit(edges, N, energy_MeV, verb)
 [xData, yData] = prepareCurveData(edges, N);
 
 % Set up fittype and options.
+% ft = fittype('gauss2');
 ft = fittype('smoothingspline');
 
 % Fit model to data.
@@ -26,6 +27,7 @@ ft = fittype('smoothingspline');
 if verb==1
     % Create a figure for the plots.
     figure('Name','Smoothing Spline Fit to Histogram');
+%     figure('Name','Gaussian 2-term Fit to Histogram');
     
     % Plot fit with data.
     subplot( 2, 1, 1 );

@@ -3,9 +3,9 @@
 % mono-energetic Geant4 runs!!! It is called at the start of main.m.
 
 % Simulation parameters
-energy = 10; % Simulation energy in MeV
+energy = 50; % Simulation energy in MeV
 num_particles = 1E9; % Number of electrons in each simulation
-num_simulations = 5; % Number of simulations to process
+num_simulations = 10; % Number of simulations to process
 
 energy_str = [num2str(energy,'%02.0f'),'MeV'];
 
