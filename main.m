@@ -23,12 +23,7 @@ end
 
 % Combine all simulations and save the total energy accumulated on the CCD,
 % make histograms of energy deposition
-% if length(processed_files)==num_simulations
-%     outputfile = [dataDir,'processed/',energy_str,'_all.mat'];
-% else
-    outputfile = [dataDir,'processed/',energy_str,'_',num2str(num_simulations),'runs.mat'];
-% end
-
+outputfile = [dataDir,'processed/',energy_str,'_',num2str(num_simulations),'runs.mat'];
 if ~exist(outputfile,'file')||recombine
     combineSims(energy,num_simulations)
 else
@@ -37,8 +32,8 @@ end
 
 % Make histogram and normalize to 1
 % If there are no pixels with energy deposited, the script will exit
-[N, N_norm, edges] = makeHistogram(bin_width,energy,num_simulations,num_particles,verbose);
+[N, N_norm, N_all, N_all_norm, edges] = makeHistogram(bin_width,energy,num_simulations,num_particles,verbose);
 
 % Fit a curve to the histogram
-[fitresult, gof] = createFit(edges, N_norm, energy, verbose);
+% [fitresult, gof] = createFit(edges, N_norm, energy, verbose);
 % save fitParams_100MeV_9sims.mat fitresult N edges gof

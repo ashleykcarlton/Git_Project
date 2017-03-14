@@ -18,7 +18,7 @@ aboveE = 3; % keV, normalization should occur at the max after this value
 % Reporting parameters
 verbose = 1; % Plots generated if verbose==1
 recombine = 1; % Trimmed raw files are combined and saved
-saveFit = 1; % Save the fit parameters
+saveFit = 0; % Save the fit parameters
 
 for ii=1:length(energy)
     
@@ -31,7 +31,7 @@ for ii=1:length(energy)
         combineSims(energy(ii),num_simulations(ii))
         % Make histogram and normalize to 1
         % If there are no pixels with energy deposited, the script will exit
-        [N, N_norm, edges] = makeHistogram(bin_width,energy(ii),num_simulations(ii),num_particles,verbose);
+        [N, N_norm, ~,~,edges] = makeHistogram(bin_width,energy(ii),num_simulations(ii),num_particles,verbose);
         
         % Fit a curve to the histogram
 %         [fitresult, gof] = createFit(edges, N_norm, energy(ii),1);
@@ -45,6 +45,7 @@ for ii=1:length(energy)
     end
     load(putfile)
     load(fitfile)
+    edges = 0:0.1:2E5;
     E_tot_array_noZeros = simEnergyCombined.Edep_all_array(simEnergyCombined.Edep_all_array~=0);
     histresults(ii).E_tot_array_noZeros = E_tot_array_noZeros;
     histresults(ii).N = N;
@@ -55,7 +56,7 @@ for ii=1:length(energy)
     fitresults(ii).gof = gof;
     fitresults(ii).pred = preds;
     
-    min_edge_range(ii) = length(histresults(ii).edges);
+    min_edge_range(ii) = length(histresults(ii).N);
 
     % Normalization
 %     histresults(ii).N_norm = N/max(N);
@@ -105,11 +106,11 @@ axes1.FontWeight = 'bold';
 grid on; box on;
 
 
-% Plot fitted curves -- normalized, zoomed in (<50 keV), with 95% confint
-figure('Color',[1 1 1]); jj=1;
-plot(fitresults(jj).edges,histresults(jj).N_norm)
-hold on
-plot(fitresults(jj).edges,fitresults(jj).pred(1,:),'m--')
+% % Plot fitted curves -- normalized, zoomed in (<50 keV), with 95% confint
+% figure('Color',[1 1 1]); jj=1;
+% plot(fitresults(jj).edges,histresults(jj).N_norm)
+% hold on
+% plot(fitresults(jj).edges,fitresults(jj).pred(1,:),'m--')
 
 % figure1 = figure('Color',[1 1 1]);
 % axes1 = axes('Parent',figure1);
@@ -129,24 +130,24 @@ plot(fitresults(jj).edges,fitresults(jj).pred(1,:),'m--')
 % grid on; box on;
 
 
-% Plot fitted curves -- normalized to >3 keV, zoomed in (<50 keV)
-figure1 = figure('Color',[1 1 1]);
-axes1 = axes('Parent',figure1);
-hold(axes1,'on');
-for jj=1:length(energy)
-    displayName = strcat(num2str(num_simulations(jj)),' sims of ',num2str(energy(jj)),' MeV');
-    plot(histresults(jj).edges(1+aboveE/bin_width:end),fitresults(jj).fit_3keV,...
-        'DisplayName',displayName,'LineWidth',1.0)
-end
-legend(axes1,'show');
-xlim(axes1,[0 50])
-xlabel(axes1,'Energy Deposited [keV]')
-ylim(axes1,[0 1])
-ylabel(axes1,'Normalized Number of Pixels')
-title('Fitted Curves of Mono-energ. Sims -- Normalized to Peak >3 keV')
-axes1.FontSize = 18;
-axes1.FontWeight = 'bold';
-grid on; box on;
+% % Plot fitted curves -- normalized to >3 keV, zoomed in (<50 keV)
+% figure1 = figure('Color',[1 1 1]);
+% axes1 = axes('Parent',figure1);
+% hold(axes1,'on');
+% for jj=1:length(energy)
+%     displayName = strcat(num2str(num_simulations(jj)),' sims of ',num2str(energy(jj)),' MeV');
+%     plot(histresults(jj).edges(1+aboveE/bin_width:end),fitresults(jj).fit_3keV,...
+%         'DisplayName',displayName,'LineWidth',1.0)
+% end
+% legend(axes1,'show');
+% xlim(axes1,[0 50])
+% xlabel(axes1,'Energy Deposited [keV]')
+% ylim(axes1,[0 1])
+% ylabel(axes1,'Normalized Number of Pixels')
+% title('Fitted Curves of Mono-energ. Sims -- Normalized to Peak >3 keV')
+% axes1.FontSize = 18;
+% axes1.FontWeight = 'bold';
+% grid on; box on;
 
 % % Plot histograms -- not normalized
 % figure('Color',[1 1 1])
@@ -164,12 +165,12 @@ grid on; box on;
 
 cmap = colormap('parula');
 cmap_inds = 1:floor(length(cmap)/length(energy)):length(cmap);
-
+% EDGES = histresults(kk).edges(1:min(min_edge_range));
 figure1 = figure('Color',[1 1 1]);
 % Plot histograms -- normalized
 subplot(2,1,1)
 hold on;
-for kk = length(energy):-1:1
+for kk = 1:length(energy)
     displayName = strcat(num2str(num_simulations(kk)),' sims of ',num2str(energy(kk)),' MeV');
     bar(histresults(kk).edges(1:min(min_edge_range)),histresults(kk).N_norm(1:min(min_edge_range)),'FaceAlpha',0.75,...
         'FaceColor',cmap(cmap_inds(kk),:),'BarWidth',1,'EdgeColor','none','DisplayName',displayName)

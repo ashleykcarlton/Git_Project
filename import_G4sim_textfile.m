@@ -69,11 +69,19 @@ for kk=1:length(simInfo.EnergyDeposited)
 end
 simStats.num_tracks = length(simInfo.EventID);
 simStats.num_nonzero_tracks = length(k_array);
-simStats.num_unique_parentIDs = length(unique(simInfo.ParentID));
+simStats.num_primaries = length(find(simInfo.ParentID==0));
+simStats.num_source_particles = length(unique(simInfo.EventID));
+[c, ~] = unique(simInfo.ParticleName(simInfo.EnergyDeposited~=0));
+sort2cats = categorical(simInfo.ParticleName(simInfo.EnergyDeposited~=0),c);
+N = histcounts(sort2cats);
 
 fprintf(fid,'Total tracks in simulation: %d\n',simStats.num_tracks);
+fprintf(fid,'Number of unique source particles that contribute to total tracks: %d\n',simStats.num_source_particles);
+fprintf(fid,'Number of Primaries that hit detector: %d\n',simStats.num_primaries);
 fprintf(fid,'Total non-zero tracks in simulation: %d\n',simStats.num_nonzero_tracks);
-fprintf(fid,'Number of unique parent IDs: %d\n',simStats.num_unique_parentIDs);
+for jj=1:length(c)
+    fprintf(fid,'%d %s deposit energy\n',N(jj),c{jj});
+end
 
 fclose(fid);
 

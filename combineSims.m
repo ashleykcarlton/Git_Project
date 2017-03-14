@@ -16,20 +16,25 @@ getFilenames = dir([dataDir,'*_run*']);
 % else
     outputfile = [dataDir,energy_str,'_',num2str(num_sims),'runs.mat'];
 % end
-
+hitEnergy = [];
+total_KE = [];
 for jj=1:num_sims
    load([dataDir,getFilenames(jj).name])
    total_tracks(jj) = simStats.num_tracks;
    total_nonzero_tracks(jj) = simStats.num_nonzero_tracks;
-   total_unique_PIDs(jj) = simStats.num_unique_parentIDs;
+   total_primaries(jj) = simStats.num_primaries;
    
+   total_KE = [total_KE,simInfo.KineticEnergy'];
+   hitEnergy = [hitEnergy,simInfo.EnergyDeposited'];
    E_tot(:,:,jj) = E_tot_sim;
 end
 
 simStatsCombined.total_tracks = sum(total_tracks);
 simStatsCombined.total_nonzero_tracks = sum(total_nonzero_tracks);
-simStatsCombined.total_unique_parentIDs = sum(total_unique_PIDs);
+simStatsCombined.total_primaries = sum(total_primaries);
 
+simEnergyCombined.KE = total_KE;
+simEnergyCombined.Edep_noMatrix = hitEnergy;
 simEnergyCombined.Edep_eachSim = E_tot;
 simEnergyCombined.Edep_all = sum(E_tot,3);
 simEnergyCombined.Edep_all_array = reshape(simEnergyCombined.Edep_all,length(simEnergyCombined.Edep_all)^2,1);
